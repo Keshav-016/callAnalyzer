@@ -16,30 +16,30 @@ AI-powered call summarization & QA system for telecom customer support centers. 
 
 #### Infrastructure Tasks
 
-- [ ] **1.1** - Set up Google Cloud Project and enable required APIs
+- [D] **1.1** - Set up Google Cloud Project and enable required APIs
   - Enable Google Cloud Speech-to-Text API
   - Enable Vertex AI API
   - Enable Cloud Pub/Sub API
   - Enable BigQuery API
   - Enable Cloud Storage API
 
-- [ ] **1.2** - Create BigQuery datasets and tables
+- [D] **1.2** - Create BigQuery datasets and tables
   - Create dataset: `call_analysis`
   - Create table: `call_transcripts` (with schema from Readme)
-  - Create table: `call_analysis` (with schema from Readme)
+  - Create table: `analyzed_calls` (with schema from Readme)
   - Create table: `agents` (with schema from Readme)
 
-- [ ] **1.3** - Set up Google Cloud Storage bucket
+- [D] **1.3** - Set up Google Cloud Storage bucket
   - Create bucket for audio files
   - Set appropriate access controls
   - Configure retention policies
 
-- [ ] **1.4** - Configure Cloud Pub/Sub topics and subscriptions
+- [D] **1.4** - Configure Cloud Pub/Sub topics and subscriptions
   - Create topic: `audio-upload-events`
   - Create subscription: `transcription-worker-sub`
   - Configure message retention
 
-- [ ] **1.5** - Set up service accounts and IAM permissions
+- [D] **1.5** - Set up service accounts and IAM permissions
   - Create service account for backend
   - Create service account for workers
   - Grant appropriate permissions (Storage, Pub/Sub, BigQuery, Speech-to-Text)
@@ -53,13 +53,12 @@ AI-powered call summarization & QA system for telecom customer support centers. 
 
 #### Backend Foundation
 
-- [ ] **2.1** - Initialize Node.js project structure
+- [D] **2.1** - Initialize Node.js project structure
   - Create `backend/` directory
   - Initialize `package.json`
   - Set up directory structure (controllers, routes, services, workers, scheduler)
   - Create `.env.example` template
-
-- [ ] **2.2** - Install core dependencies
+- [D] **2.2** - Install core dependencies
   - Express.js
   - Google Cloud libraries (Storage, Pub/Sub, BigQuery, Speech-to-Text)
   - JWT authentication libraries
@@ -67,13 +66,13 @@ AI-powered call summarization & QA system for telecom customer support centers. 
   - Logging libraries
   - Additional utilities (multer, axios, etc.)
 
-- [ ] **2.3** - Set up Express server and middleware
+- [D] **2.3** - Set up Express server and middleware
   - Create main server file (index.js or app.js)
   - Configure middleware (express.json(), cors, etc.)
   - Set up error handling middleware
   - Configure request logging
 
-- [ ] **2.4** - Implement authentication & authorization
+- [D] **2.4** - Implement authentication & authorization
   - Set up JWT token generation
   - Create JWT verification middleware
   - Implement user authentication endpoints (basic auth)
@@ -81,19 +80,19 @@ AI-powered call summarization & QA system for telecom customer support centers. 
 
 #### Backend APIs - Audio Upload
 
-- [ ] **2.5** - Create `/upload` endpoint
+- [D] **2.5** - Create `/upload` endpoint
   - Configure multer for file handling
   - Implement audio file validation
   - Store file in Cloud Storage
   - Generate unique call_id
 
-- [ ] **2.6** - Implement Pub/Sub event publishing
+- [D] **2.6** - Implement Pub/Sub event publishing
   - Create event publisher service
   - Publish `audio-upload-events` when file is uploaded
   - Include metadata (call_id, agent_id, file_path)
   - Add error handling and retry logic
 
-- [ ] **2.7** - Create call record in BigQuery
+- [D] **2.7** - Create call record in BigQuery
   - Create database service layer
   - Insert record into `call_transcripts` table
   - Set `analyzed = FALSE`
@@ -101,39 +100,39 @@ AI-powered call summarization & QA system for telecom customer support centers. 
 
 #### Backend APIs - Retrieval & Status
 
-- [ ] **2.8** - Create `/calls` endpoint (list calls)
+- [D] **2.8** - Create `/calls` endpoint (list calls)
   - Query BigQuery for recent calls
   - Filter by date range, agent_id
   - Return paginated results
 
-- [ ] **2.9** - Create `/calls/:id` endpoint (get call details)
+- [D] **2.9** - Create `/calls/:id` endpoint (get call details)
   - Fetch transcript from BigQuery
-  - Fetch analysis results from `call_analysis` table
+  - Fetch analysis results from `analysed_calls` table
   - Return combined response
 
-- [ ] **2.10** - Create `/analysis/:id` endpoint
+- [D] **2.10** - Create `/analysis/:id` endpoint
   - Get analysis results
   - Return summary, category, sentiment, score, improvements
 
-- [ ] **2.11** - Create health check endpoint
+- [D] **2.11** - Create health check endpoint
   - `/health` - system status
   - Verify database connections
   - Verify Cloud service connectivity
 
 #### Backend Services Layer
 
-- [ ] **2.12** - Create transcription service
+- [D] **2.12** - Create transcription service
   - Implement Google Cloud Speech-to-Text integration
   - Function to transcribe audio file
   - Error handling for failed transcriptions
 
-- [ ] **2.13** - Create analysis service
+- [D] **2.13** - Create analysis service
   - Implement Gemini API integration
   - Function to send transcript to Gemini
   - JSON parsing of response
   - Error handling for API failures
 
-- [ ] **2.14** - Create BigQuery service
+- [D] **2.14** - Create BigQuery service
   - CRUD operations for all tables
   - Query builder for common queries
   - Connection pooling
@@ -174,7 +173,7 @@ AI-powered call summarization & QA system for telecom customer support centers. 
   - For each unanalyzed transcript:
     - Call analysis service (Gemini)
     - Parse structured JSON response
-    - Insert into `call_analysis` table
+    - Insert into `analysed_calls` table
     - Update transcript: `analyzed = TRUE`
 
 - [ ] **3.6** - Implement error handling for AI analysis

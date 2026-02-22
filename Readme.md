@@ -158,7 +158,7 @@ Performs:
 
 ---
 
-## Table: `call_analysis`
+## Table: `analyzed_calls`
 
 | Field        | Type      | Description        |
 | ------------ | --------- | ------------------ |
@@ -167,18 +167,20 @@ Performs:
 | category     | STRING    | Call reason        |
 | sentiment    | STRING    | Customer sentiment |
 | agent_score  | INT64     | Score (1–10)       |
-| improvements | STRING    | JSON array         |
+| improvements | JSON      | JSON array         |
 | processed_at | TIMESTAMP | AI processing time |
 
 ---
 
 ## Table: `agents`
 
-| Field      | Type   |
-| ---------- | ------ |
-| agent_id   | STRING |
-| team       | STRING |
-| supervisor | STRING |
+| Field        | Type   |
+| ------------ | ------ |
+| agent_id     | STRING |
+| name         | STRING |
+| email        | STRING |
+| department   | STRING |
+| joining_date | DATE   |
 
 ---
 

@@ -1,0 +1,9 @@
+{
+  "watch": ["**/*.ts"],
+  "ext": "ts",
+  "ignore": ["node_modules", "dist"],
+  "exec": "node --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"ts-node/esm\", pathToFileURL(\"./\"));' app.ts",
+  "env": {
+    "NODE_OPTIONS": "--experimental-specifier-resolution=node"
+  }
+}

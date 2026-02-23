@@ -3,7 +3,7 @@ import healthController from '../controllers/healthController.js';
 import authRoutes from './auth.js';
 import uploadRoutes from './upload.js';
 import callsRoutes from './calls.js';
-import { authenticate } from '../middlewares/auth.js';
+import authMiddleware from '../middlewares/auth.js';
 
 const router = Router();
 
@@ -15,7 +15,7 @@ router.get('/health', healthController.health);
 router.get('/', (req, res) => res.json({ status: 'ok', service: 'call-analyzer-backend' }));
 
 // Example protected route
-router.get('/protected', authenticate, (req, res) => {
+router.get('/protected', authMiddleware.authenticate, (req, res) => {
   res.json({ msg: 'protected content', user: req.user });
 });
 

@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import callsController from '../controllers/callsController.js';
-import { authenticate } from '../middlewares/auth.js';
+import authMiddleware from '../middlewares/auth.js';
 
 const router = Router();
 
-router.get('/', authenticate, callsController.listCalls);
-router.get('/:id', authenticate, callsController.getCall);
+router.get('/', authMiddleware.authenticate, callsController.listCalls);
+router.get('/:id', authMiddleware.authenticate, callsController.getCall);
 
 export default router;

@@ -3,7 +3,8 @@ import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import routes from './routes/index.js';
-import { errorHandler } from './middlewares/errorHandler.js';
+import errorHandler from './middlewares/errorHandler.js';
+import env from './utils/Env.js';
 
 dotenv.config();
 
@@ -17,9 +18,9 @@ app.use(morgan('dev'));
 app.use('/', routes);
 
 // Error handler
-app.use(errorHandler);
+app.use(errorHandler.errorHandler);
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(env.PORT) || 3000;
 app.listen(PORT, () => {
   console.log(`Call Analyzer backend listening on port ${PORT}`);
 });

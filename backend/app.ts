@@ -1,4 +1,4 @@
-import express, { Express } from 'express';
+import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
@@ -19,6 +19,10 @@ app.use('/', routes);
 
 // Error handler
 app.use(errorHandler.errorHandler);
+
+app.get('/health', (_req: Request, res: Response) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 const PORT = Number(env.PORT) || 3000;
 app.listen(PORT, () => {

@@ -21,7 +21,12 @@ class UploadController {
 
       const call_id = crypto.randomUUID();
       const destPath = `audio/${call_id}/${file.originalname}`;
+      console.log(
+        `[Upload] Starting upload - call_id: ${call_id}, agent_id: ${agent_id}, file: ${file.originalname}`,
+      );
+
       const storedPath = await storageService.uploadFile(file, destPath);
+      console.log(`[Upload] ✅ File stored at: ${storedPath}`);
 
       const record: CallTranscript = {
         call_id,
@@ -31,9 +36,19 @@ class UploadController {
         analyzed: false,
       };
 
-      await bigqueryService.insertCallTranscript(record);
+      const insertResult = await bigqueryService.insertCallTranscript(record);
+      console.log(
+        `[Upload] ${insertResult.ok ? '✅' : '❌'} BigQuery insert: ${JSON.stringify(insertResult)}`,
+      );
 
-      await pubsubService.publishAudioUpload({ call_id, agent_id, file_path: storedPath });
+      const pubsubResult = await pubsubService.publishAudioUpload({
+        call_id,
+        agent_id,
+        file_path: storedPath,
+      });
+      console.log(
+        `[Upload] ${pubsubResult.ok ? '✅' : '❌'} Pub/Sub publish: ${JSON.stringify(pubsubResult)}`,
+      );
 
       const response: UploadResponse = { call_id };
       res.status(201).json(response);

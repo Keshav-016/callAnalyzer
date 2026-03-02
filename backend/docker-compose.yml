@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice:latest
+    container_name: whisper
+    ports:
+      - '9000:9000'
+    environment:
+      - ASR_MODEL=base
+      - ASR_ENGINE=openai_whisper
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - '11434:11434'
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+
+  backend:
+    build: ./
+    container_name: backend
+    ports:
+      - '${PORT}:${PORT}'
+    volumes:
+      - ./:/app
+      - node_modules:/app/node_modules
+    env_file:
+      - .env
+    environment:
+      - WHISPER_URL=http://whisper:9000
+      - OLLAMA_URL=http://ollama:11434
+    command: npm run dev
+    depends_on:
+      - whisper
+      - ollama
+    restart: unless-stopped
+
+volumes:
+  ollama-data:
+  node_modules:

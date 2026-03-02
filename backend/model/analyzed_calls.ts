@@ -43,6 +43,11 @@ const analyzedCallSchema = new mongoose.Schema<AnalyzedCallType>(
       required: true,
       default: [],
     },
+    agent_id: {
+      type: String,
+      required: true,
+      index: true,
+    },
 
     analyzed_at: {
       type: Date,

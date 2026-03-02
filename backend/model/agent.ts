@@ -13,7 +13,10 @@ const agentSchema = new mongoose.Schema<AgentType>(
       type: String,
       required: true,
     },
-
+    password: {
+      type: String,
+      required: true,
+    },
     email: {
       type: String,
       required: true,
@@ -37,5 +40,6 @@ const agentSchema = new mongoose.Schema<AgentType>(
     versionKey: false,
   },
 );
+agentSchema.index({ department: 1, joining_date: -1 });
 
 export const Agent = mongoose.model('agents', agentSchema);

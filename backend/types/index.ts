@@ -54,6 +54,7 @@ export interface CallTranscriptType {
 export interface AnalyzedCallType {
   call_id: string;
   summary: string;
+  agent_id: string;
   category: string;
   sentiment: string;
   score: number;

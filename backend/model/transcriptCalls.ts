@@ -45,6 +45,7 @@ const transcriptCallSchema = new mongoose.Schema<CallTranscriptType>(
 );
 
 // Important dashboard indexes
-transcriptCallSchema.index({ agent_id: 1, created_at: -1 });
+transcriptCallSchema.index({ agent_id: 1, createdAt: -1 });
+transcriptCallSchema.index({ agent_id: 1, createdAt: -1 });
 
 export const TranscriptCall = mongoose.model('transcript_calls', transcriptCallSchema);

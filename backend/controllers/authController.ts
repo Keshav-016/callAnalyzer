@@ -1,13 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import userService from '../services/userService.js';
-import { AuthResponse } from '../types/index.js';
+import jwt, { SignOptions } from 'jsonwebtoken';
+import userService from '../services/agentService.js';
+import { AuthResponseType } from '../types/index.js';
 import env from '../utils/Env.js';
 
-const JWT_SECRET = env.JWT_SECRET || 'changeme';
-const JWT_EXP = '8h';
-
 class AuthController {
+  private readonly JWT_SECRET: string;
+  private readonly JWT_EXP: string;
+
+  constructor() {
+    this.JWT_SECRET = env.JWT_SECRET;
+    this.JWT_EXP = env.JWT_EXP;
+  }
+
   login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { agent_id, password } = req.body;
@@ -22,8 +27,9 @@ class AuthController {
         return;
       }
 
-      const token = jwt.sign({ sub: user.id, name: user.name }, JWT_SECRET, { expiresIn: JWT_EXP });
-      const response: AuthResponse = { token, user };
+      const signOptions: SignOptions = { expiresIn: this.JWT_EXP as SignOptions['expiresIn'] };
+      const token = jwt.sign({ sub: user.id, name: user.name }, this.JWT_SECRET, signOptions);
+      const response: AuthResponseType = { token, user };
       res.json(response);
     } catch (err) {
       next(err);

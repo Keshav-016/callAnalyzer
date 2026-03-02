@@ -1,11 +1,11 @@
-import { AnalysisResult } from '../types/index.js';
+import { AnalysisResultType } from '../types/index.js';
 
 // Simple analysis service placeholder — integrates with Gemini/Vertex AI in production
 
 class AnalysisService {
-  analyzeTranscript = async (transcript: string): Promise<AnalysisResult> => {
+  analyzeTranscript = async (transcript: string): Promise<AnalysisResultType> => {
     // If Vertex/Gemini is configured, call it here. For now return structured stub.
-    const result: AnalysisResult = {
+    const result: AnalysisResultType = {
       summary: transcript.slice(0, 200),
       category: 'customer_support',
       sentiment: 'neutral',

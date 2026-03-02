@@ -2,8 +2,8 @@ import { Request, Response, NextFunction } from 'express';
 import crypto from 'node:crypto';
 import storageService from '../services/storageService.js';
 import pubsubService from '../services/pubsubService.js';
-import bigqueryService from '../services/bigqueryService.js';
-import { UploadResponse, CallTranscript } from '../types/index.js';
+import mongodbService from '../services/mongodbService.js';
+import { UploadResponseType, CallTranscriptType } from '../types/index.js';
 
 class UploadController {
   upload = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -28,7 +28,7 @@ class UploadController {
       const storedPath = await storageService.uploadFile(file, destPath);
       console.log(`[Upload] ✅ File stored at: ${storedPath}`);
 
-      const record: CallTranscript = {
+      const record: CallTranscriptType = {
         call_id,
         agent_id,
         file_path: storedPath,
@@ -36,9 +36,9 @@ class UploadController {
         analyzed: false,
       };
 
-      const insertResult = await bigqueryService.insertCallTranscript(record);
+      const insertResult = await mongodbService.insertCallTranscript(record);
       console.log(
-        `[Upload] ${insertResult.ok ? '✅' : '❌'} BigQuery insert: ${JSON.stringify(insertResult)}`,
+        `[Upload] ${insertResult.ok ? '✅' : '❌'} MongoDB insert: ${JSON.stringify(insertResult)}`,
       );
 
       const pubsubResult = await pubsubService.publishAudioUpload({
@@ -50,7 +50,7 @@ class UploadController {
         `[Upload] ${pubsubResult.ok ? '✅' : '❌'} Pub/Sub publish: ${JSON.stringify(pubsubResult)}`,
       );
 
-      const response: UploadResponse = { call_id };
+      const response: UploadResponseType = { call_id };
       res.status(201).json(response);
     } catch (err) {
       next(err);

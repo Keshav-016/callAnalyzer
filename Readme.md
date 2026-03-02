@@ -119,7 +119,7 @@ Looker Studio Dashboard
 
 ### Data Warehouse
 
-- BigQuery  
+- Mongodb
   Stores transcripts and AI analysis results.
 
 ### AI Analysis

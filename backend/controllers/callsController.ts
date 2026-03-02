@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import bigqueryService from '../services/bigqueryService.js';
+import mongodbService from '../services/mongodbService.js';
 
 class CallsController {
   listCalls = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { agent_id, limit } = req.query;
-      const rows = await bigqueryService.queryCalls({
+      const rows = await mongodbService.queryCalls({
         agent_id: agent_id as string | undefined,
         limit: limit ? Number(limit) : 50,
       });
@@ -18,12 +18,12 @@ class CallsController {
   getCall = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const call_id = req.params.id;
-      const call = await bigqueryService.getCallById(call_id);
+      const call = await mongodbService.getCallById(call_id);
       if (!call) {
         res.status(404).json({ error: 'not found' });
         return;
       }
-      const analysis = await bigqueryService.getAnalysisByCallId(call_id);
+      const analysis = await mongodbService.getAnalysisByCallId(call_id);
       res.json({ call, analysis });
     } catch (err) {
       next(err);
@@ -33,7 +33,7 @@ class CallsController {
   getAnalysis = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const call_id = req.params.id;
-      const analysis = await bigqueryService.getAnalysisByCallId(call_id);
+      const analysis = await mongodbService.getAnalysisByCallId(call_id);
       if (!analysis) {
         res.status(404).json({ error: 'not found' });
         return;

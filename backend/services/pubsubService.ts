@@ -1,5 +1,5 @@
 import { PubSub } from '@google-cloud/pubsub';
-import { PubSubMessage, PubSubResult } from '../types/index.js';
+import { PubSubMessageType, PubSubResultType } from '../types/index.js';
 import env from '../utils/Env.js';
 
 class PubsubService {
@@ -17,7 +17,7 @@ class PubsubService {
     this.topic = env.GCP_PUBSUB_TOPIC;
   }
 
-  publishAudioUpload = async (messageObj: PubSubMessage): Promise<PubSubResult> => {
+  publishAudioUpload = async (messageObj: PubSubMessageType): Promise<PubSubResultType> => {
     const payload = JSON.stringify(messageObj);
     if (this.pubsubClient && this.topic) {
       const topicObj = this.pubsubClient.topic(this.topic);

@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import routes from './routes/index.js';
 import errorHandler from './middlewares/errorHandler.js';
 import env from './utils/Env.js';
+import mongodbService from './services/mongodbService.js';
 
 dotenv.config();
 
@@ -25,8 +26,19 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 const PORT = Number(env.PORT) || 3000;
-app.listen(PORT, () => {
-  console.log(`Call Analyzer backend listening on port ${PORT}`);
-});
+const bootstrap = async (): Promise<void> => {
+  try {
+    await mongodbService.connect();
+  } catch (err) {
+    console.error('[App] Failed to connect to MongoDB:', (err as Error).message);
+    process.exit(1);
+  }
+
+  app.listen(PORT, () => {
+    console.log(`Call Analyzer backend listening on port ${PORT}`);
+  });
+};
+
+void bootstrap();
 
 export default app;

@@ -7,7 +7,6 @@ const agentSchema = new mongoose.Schema<AgentType>(
       type: String,
       required: true,
       unique: true,
-      index: true,
     },
     name: {
       type: String,

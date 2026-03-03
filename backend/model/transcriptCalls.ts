@@ -13,7 +13,6 @@ const transcriptCallSchema = new mongoose.Schema<CallTranscriptType>(
     agent_id: {
       type: String,
       required: true,
-      index: true,
       ref: 'agents', // optional reference
     },
 

@@ -1,6 +1,6 @@
 import multer, { type Multer } from 'multer';
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 
 // Ensure upload directory exists
 const uploadDir = path.join(process.cwd(), 'uploads/audio');
@@ -23,11 +23,13 @@ const upload: Multer = multer({
   storage,
   limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    const allowed = ['audio/mpeg', 'audio/wav', 'audio/mp3'];
-    if (allowed.includes(file.mimetype)) {
+    const allowedExt = ['.mp3', '.wav', '.m4a'];
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    if (file.mimetype.startsWith('audio/') && allowedExt.includes(ext)) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type'));
+      cb(new Error('Invalid audio file type'));
     }
   },
 });

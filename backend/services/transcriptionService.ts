@@ -1,8 +1,9 @@
 import axios from 'axios';
 import FormData from 'form-data';
 import fs from 'node:fs';
+import env from '../utils/Env';
 
-const WHISPER_URL = process.env.WHISPER_URL || 'http://localhost:9000';
+const WHISPER_URL = env.WHISPER_URL;
 
 class TranscriptionService {
   transcribeAudio = async (filePath: string) => {

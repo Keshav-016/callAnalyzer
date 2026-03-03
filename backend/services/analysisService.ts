@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { AnalysisResultType } from '../types/index.js';
+import env from '../utils/Env.js';
 
-const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
+const OLLAMA_URL = env.OLLAMA_URL || 'http://localhost:11434';
 const prompt = `
 You are a senior telecom Quality Assurance (QA) supervisor.
 
@@ -69,6 +70,7 @@ class AnalysisService {
       }
 
       const parsed = JSON.parse(jsonMatch[0]);
+      console.log(parsed);
 
       return {
         summary: parsed.summary,
@@ -78,7 +80,7 @@ class AnalysisService {
         improvements: parsed.improvements,
       };
     } catch (error: any) {
-      console.error('Ollama analysis error:', error.message);
+      console.error('Ollama analysis error:', error);
 
       // fallback safe result
       return {

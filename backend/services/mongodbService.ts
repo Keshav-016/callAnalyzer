@@ -3,6 +3,7 @@ import {
   AnalyzedCallType,
   CallTranscriptType,
   CallsQueryType,
+  UpdateCallTranscriptType,
   UserType,
 } from '../types/index.js';
 import { AnalyzedCall } from '../model/analyzed_calls.js';
@@ -19,10 +20,19 @@ class MongodbService {
       return { ok: false };
     }
   };
+  updateCallTranscript = async (record: UpdateCallTranscriptType): Promise<{ ok: boolean }> => {
+    try {
+      await TranscriptCall.updateOne({ call_id: record.call_id }, { $set: record });
+      return { ok: true };
+    } catch (err) {
+      console.error('[MongoDB] Failed to insert call transcript:', (err as Error).message);
+      return { ok: false };
+    }
+  };
 
   insertAnalyzedCall = async (record: AnalyzedCallType): Promise<{ ok: boolean }> => {
     try {
-      await AnalyzedCall.updateOne({ call_id: record.call_id }, { $set: { analyzed: true } });
+      await AnalyzedCall.insertOne(record);
       return { ok: true };
     } catch (err) {
       console.error('[MongoDB] Failed to insert analysis:', (err as Error).message);

@@ -51,15 +51,21 @@ export interface CallTranscriptType {
   analyzed: boolean;
 }
 
+export interface UpdateCallTranscriptType {
+  call_id: string;
+  transcript?: string;
+  duration?: number;
+  analyzed: boolean;
+}
+
 export interface AnalyzedCallType {
   call_id: string;
   summary: string;
-  agent_id: string;
   category: string;
   sentiment: string;
   score: number;
   improvements: string[];
-  analyzed_at: Date;
+  analyzed_at?: Date;
 }
 
 export interface AnalysisResultType {

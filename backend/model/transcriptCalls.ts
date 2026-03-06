@@ -49,8 +49,9 @@ const transcriptCallSchema = new mongoose.Schema<CallTranscriptType>(
     versionKey: false,
     toJSON: {
       transform: (_doc, ret) => {
-        delete ret._id;
-        return ret;
+        const cleaned = ret as Record<string, unknown>;
+        delete cleaned._id;
+        return cleaned;
       },
     },
   },

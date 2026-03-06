@@ -1,12 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 import mongoose from 'mongoose';
-
-export interface AppError extends Error {
-  status?: number;
-}
+import { AppErrorShape } from '../utils/appError.js';
 
 class ErrorHandler {
-  errorHandler = (err: AppError, req: Request, res: Response, next: NextFunction): void => {
+  errorHandler = (
+    err: AppErrorShape,
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): void => {
     console.error(err);
     if ((err as Error & { code?: number }).code === 11000) {
       const duplicate = err as Error & { keyPattern?: Record<string, number> };

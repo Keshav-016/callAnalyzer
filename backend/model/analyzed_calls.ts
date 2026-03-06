@@ -56,8 +56,9 @@ const analyzedCallSchema = new mongoose.Schema<AnalyzedCallType>(
     versionKey: false,
     toJSON: {
       transform: (_doc, ret) => {
-        delete ret._id;
-        return ret;
+        const cleaned = ret as Record<string, unknown>;
+        delete cleaned._id;
+        return cleaned;
       },
     },
   },

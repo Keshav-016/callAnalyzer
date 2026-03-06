@@ -4,10 +4,13 @@ import env from '../utils/Env';
 const RABBIT_URL = env.RABBITMQ_URL;
 
 class RabbitMqService {
+  private connection: amqp.ChannelModel | null = null;
   private channel: amqp.Channel | null = null;
+  private consumerTag: string | null = null;
 
   async connect() {
     const connection = await amqp.connect(RABBIT_URL);
+    this.connection = connection;
     this.channel = await connection.createChannel();
     await this.channel.assertQueue('call_queue', {
       durable: true,
@@ -39,7 +42,7 @@ class RabbitMqService {
   async consume(callback: (msg: any) => Promise<void>) {
     if (!this.channel) throw new Error('RabbitMQ not connected');
 
-    this.channel.consume('call_queue', async (msg) => {
+    const result = await this.channel.consume('call_queue', async (msg) => {
       if (!msg) return;
 
       const data = JSON.parse(msg.content.toString());
@@ -52,6 +55,39 @@ class RabbitMqService {
         this.channel?.nack(msg);
       }
     });
+    this.consumerTag = result.consumerTag;
+  }
+
+  async close() {
+    if (this.channel && this.consumerTag) {
+      try {
+        await this.channel.cancel(this.consumerTag);
+      } catch (error) {
+        console.error('RabbitMQ consumer cancel failed:', error);
+      } finally {
+        this.consumerTag = null;
+      }
+    }
+
+    if (this.channel) {
+      try {
+        await this.channel.close();
+      } catch (error) {
+        console.error('RabbitMQ channel close failed:', error);
+      } finally {
+        this.channel = null;
+      }
+    }
+
+    if (this.connection) {
+      try {
+        await this.connection.close();
+      } catch (error) {
+        console.error('RabbitMQ connection close failed:', error);
+      } finally {
+        this.connection = null;
+      }
+    }
   }
 }
 export default new RabbitMqService();

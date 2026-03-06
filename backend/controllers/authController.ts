@@ -3,6 +3,7 @@ import jwt, { SignOptions } from 'jsonwebtoken';
 import userService from '../services/agentService.js';
 import { AuthResponseType } from '../types/index.js';
 import env from '../utils/Env.js';
+import { createAppError } from '../utils/appError.js';
 
 class AuthController {
   private readonly JWT_SECRET: string;
@@ -17,14 +18,12 @@ class AuthController {
     try {
       const { agent_id, password } = req.body;
       if (!agent_id || !password) {
-        res.status(400).json({ error: 'agent_id and password required' });
-        return;
+        throw createAppError('agent_id and password required', 400);
       }
 
       const user = await userService.findByCredentials(agent_id, password);
       if (!user) {
-        res.status(401).json({ error: 'Invalid credentials' });
-        return;
+        throw createAppError('Invalid credentials', 401);
       }
 
       const signOptions: SignOptions = { expiresIn: this.JWT_EXP as SignOptions['expiresIn'] };
@@ -40,8 +39,7 @@ class AuthController {
     try {
       const { agent_id, name, password } = req.body;
       if (!agent_id || !name || !password) {
-        res.status(400).json({ error: 'agent_id, name and password required' });
-        return;
+        throw createAppError('agent_id, name and password required', 400);
       }
       const user = await userService.create({ id: agent_id, name, password });
       res.status(201).json({ user });

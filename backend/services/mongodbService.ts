@@ -9,6 +9,7 @@ import {
 import { AnalyzedCall } from '../model/analyzed_calls.js';
 import { TranscriptCall } from '../model/transcriptCalls.js';
 import { Agent } from '../model/agent.js';
+import { createAppError } from '../utils/appError.js';
 
 class MongodbService {
   insertCallTranscript = async (record: CallTranscriptType): Promise<void> => {
@@ -27,7 +28,7 @@ class MongodbService {
 
     const result = await TranscriptCall.updateOne({ call_id }, { $set: payload }, { runValidators: true });
     if (result.matchedCount === 0) {
-      throw new Error(`Call transcript not found: ${call_id}`);
+      throw createAppError(`Call transcript not found: ${call_id}`, 404);
     }
   };
 

@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import mongodbService from '../services/mongodbService.js';
+import { createAppError } from '../utils/appError.js';
 
 class CallsController {
   listCalls = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -20,8 +21,7 @@ class CallsController {
       const call_id = req.params.id;
       const call = await mongodbService.getCallById(call_id);
       if (!call) {
-        res.status(404).json({ error: 'not found' });
-        return;
+        throw createAppError('not found', 404);
       }
       const analysis = await mongodbService.getAnalysisByCallId(call_id);
       res.json({ call, analysis });
@@ -35,8 +35,7 @@ class CallsController {
       const call_id = req.params.id;
       const analysis = await mongodbService.getAnalysisByCallId(call_id);
       if (!analysis) {
-        res.status(404).json({ error: 'not found' });
-        return;
+        throw createAppError('not found', 404);
       }
       res.json({ analysis });
     } catch (err) {

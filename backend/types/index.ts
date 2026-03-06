@@ -55,7 +55,7 @@ export interface UpdateCallTranscriptType {
   call_id: string;
   transcript?: string;
   duration?: number;
-  analyzed: boolean;
+  analyzed?: boolean;
 }
 
 export interface AnalyzedCallType {
@@ -65,7 +65,7 @@ export interface AnalyzedCallType {
   sentiment: string;
   score: number;
   improvements: string[];
-  analyzed_at?: Date;
+  analyzed_at?: string;
 }
 
 export interface AnalysisResultType {

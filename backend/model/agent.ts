@@ -18,20 +18,23 @@ const agentSchema = new mongoose.Schema<AgentType>(
     },
     email: {
       type: String,
-      required: true,
+      required: false,
       unique: true,
+      sparse: true,
       index: true,
     },
 
     department: {
       type: String,
-      required: true,
+      required: false,
+      default: 'General',
       index: true,
     },
 
     joining_date: {
-      type: Date,
-      required: true,
+      type: String,
+      required: false,
+      default: () => new Date().toISOString().slice(0, 10),
     },
   },
   {

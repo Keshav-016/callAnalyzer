@@ -2,10 +2,11 @@ import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
+import { Server } from 'node:http';
 import routes from './routes/index.js';
 import errorHandler from './middlewares/errorHandler.js';
 import env from './utils/Env.js';
-import dbConnection from './config/dbConnection.js';
+import dbConnection, { closeDbConnection } from './config/dbConnection.js';
 import rabbitmqService from './services/rabbitmqService.js';
 import { startWorker } from './worker/call.worker.js';
 
@@ -25,11 +26,45 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 const PORT = Number(env.PORT) || 3000;
+let server: Server | null = null;
+let shuttingDown = false;
+
+const shutdown = async (signal: string): Promise<void> => {
+  if (shuttingDown) return;
+  shuttingDown = true;
+
+  console.log(`Received ${signal}. Starting graceful shutdown...`);
+
+  try {
+    if (server) {
+      await new Promise<void>((resolve, reject) => {
+        server?.close((err) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve();
+        });
+      });
+      console.log('HTTP server closed');
+    }
+
+    await rabbitmqService.close();
+    console.log('RabbitMQ connection closed');
+
+    await closeDbConnection();
+
+    process.exit(0);
+  } catch (error) {
+    console.error('Graceful shutdown failed:', error);
+    process.exit(1);
+  }
+};
 
 // 🔥 Proper async bootstrap
 const startServer = async () => {
   try {
-    dbConnection();
+    await dbConnection();
     console.log('✅ Database connected');
 
     await rabbitmqService.connectWithRetry();
@@ -38,7 +73,7 @@ const startServer = async () => {
     await startWorker();
     console.log('worker connected');
 
-    app.listen(PORT, () => {
+    server = app.listen(PORT, () => {
       console.log(`🚀 Backend running on port ${PORT}`);
     });
   } catch (error) {
@@ -48,5 +83,11 @@ const startServer = async () => {
 };
 
 startServer();
+process.on('SIGINT', () => {
+  void shutdown('SIGINT');
+});
+process.on('SIGTERM', () => {
+  void shutdown('SIGTERM');
+});
 
 export default app;

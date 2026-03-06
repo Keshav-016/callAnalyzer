@@ -45,15 +45,21 @@ const analyzedCallSchema = new mongoose.Schema<AnalyzedCallType>(
     },
 
     analyzed_at: {
-      type: Date,
+      type: String,
       required: true,
-      default: Date.now,
+      default: () => new Date().toISOString(),
       index: true,
     },
   },
   {
     timestamps: false, // since you already have analyzed_at
     versionKey: false,
+    toJSON: {
+      transform: (_doc, ret) => {
+        delete ret._id;
+        return ret;
+      },
+    },
   },
 );
 

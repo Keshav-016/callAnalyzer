@@ -30,6 +30,13 @@ const transcriptCallSchema = new mongoose.Schema<CallTranscriptType>(
       min: 0,
     },
 
+    created_at: {
+      type: String,
+      required: true,
+      default: () => new Date().toISOString(),
+      index: true,
+    },
+
     analyzed: {
       type: Boolean,
       required: true,
@@ -38,12 +45,18 @@ const transcriptCallSchema = new mongoose.Schema<CallTranscriptType>(
     },
   },
   {
-    timestamps: true,
+    timestamps: false,
     versionKey: false,
+    toJSON: {
+      transform: (_doc, ret) => {
+        delete ret._id;
+        return ret;
+      },
+    },
   },
 );
 
 // Important dashboard indexes
-transcriptCallSchema.index({ agent_id: 1, createdAt: -1 });
+transcriptCallSchema.index({ agent_id: 1, created_at: -1 });
 
 export const TranscriptCall = mongoose.model('transcript_calls', transcriptCallSchema);

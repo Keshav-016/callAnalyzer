@@ -51,15 +51,15 @@ Node Backend API
 ↓
 Cloud Storage (audio files)
 ↓
-Pub/Sub Queue
+RabbitMQ Queue
 ↓
 Speech-to-Text Worker
 ↓
-BigQuery (raw transcripts)
+MongoDB (raw transcripts)
 ↓
-Scheduled Gemini Job
+Scheduled llama Job
 ↓
-BigQuery (analysis results)
+MongoDB (analysis results)
 ↓
 Looker Studio Dashboard
 
@@ -142,7 +142,7 @@ Performs:
 
 ---
 
-# 🗄 Database Schema (BigQuery)
+# 🗄 Database Schema (MongoDB)
 
 ## Table: `call_transcripts`
 

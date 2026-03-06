@@ -1,74 +1,62 @@
-# Call Analyzer TODO (Post BigQuery -> MongoDB Switch)
+# Call Analyzer TODO (Implementation Status)
 
-## 1. Core Backend Migration
+## 1. Migration Status (BigQuery -> MongoDB)
 
-- [ ] Replace `backend/services/bigqueryService.ts` with `mongodbService.ts` (or `callRepository.ts`) using the MongoDB Node driver or Mongoose.
-- [ ] Update all imports/usages in controllers/services to stop referencing `bigqueryService`.
-- [ ] Add MongoDB connection bootstrap with startup validation and graceful shutdown handling.
-- [ ] Move from SQL/table operations to MongoDB collection operations:
-  - `call_transcripts` collection
-  - `analyzed_calls` collection
-  - `agents` collection
+- [x] Replace `bigqueryService` usage with `mongodbService`.
+- [x] Move core call read/write flows to MongoDB models.
+- [x] Update upload pipeline to persist transcript metadata in MongoDB.
+- [x] Store analysis output in `analyzed_calls`.
+- [x] Remove BigQuery references from runtime code paths.
+- [ ] Add graceful shutdown handling for MongoDB and RabbitMQ connections.
 
-## 2. Data Model and Indexing
+## 2. Data Model and Validation
 
-- [ ] Define TypeScript-backed MongoDB schemas/interfaces for:
-  - `CallTranscript`
-  - `AnalyzedCall`
-  - `Agent`
-- [ ] Standardize IDs (`call_id`, `agent_id`) and map `_id` handling.
-- [ ] Add indexes for query performance:
-  - `call_transcripts.call_id` (unique)
-  - `call_transcripts.agent_id`
-  - `call_transcripts.created_at`
-  - `analyzed_calls.call_id` (unique)
-- [ ] Enforce validation rules (required fields, score range, timestamps).
+- [x] Define TypeScript interfaces for `CallTranscript`, `AnalyzedCall`, and `Agent` data.
+- [x] Add core indexes (`call_id`, analysis lookup, score/category filters).
+- [ ] Align schema naming fully (`created_at` vs `createdAt`) and document one canonical API shape.
+- [ ] Enforce duplicate-key and validation error mapping with explicit HTTP responses.
+- [ ] Revisit `Agent` schema/register flow mismatch (`email` and `department` requirements).
 
-## 3. API and Service Refactor
+## 3. Worker and Pipeline Reliability
 
-- [ ] Update `backend/controllers/callsController.ts` to use Mongo-backed methods.
-- [ ] Ensure pagination strategy works with MongoDB (`limit`, optional cursor/skip).
-- [ ] Handle not-found and duplicate-key errors with clear API responses.
-- [ ] Keep route contracts stable so frontend changes are minimized.
+- [x] Use RabbitMQ queue (`call_queue`) for async upload -> processing.
+- [x] Connect worker startup in app bootstrap.
+- [x] Add RabbitMQ connection retry.
+- [ ] Add job retry policy/backoff strategy and dead-letter queue.
+- [ ] Avoid marking transcript `analyzed: true` before analysis insert succeeds.
+- [ ] Add worker idempotency protection for duplicate queue messages.
 
-## 4. Upload -> Transcribe -> Analyze Pipeline
+## 4. Environment and Config
 
-- [ ] Confirm upload flow writes transcript records to MongoDB instead of BigQuery fallback arrays.
-- [ ] Update any worker/cron logic to query unanalyzed calls from MongoDB (`analyzed: false`).
-- [ ] Persist Gemini/analysis output into `analyzed_calls` and mark transcript as analyzed.
-- [ ] Add retry/error states for failed transcription/analysis jobs.
+- [x] Centralize env validation in `backend/utils/Env.ts`.
+- [x] Use MongoDB via `DB_URL`.
+- [ ] Update `backend/.env.example` to remove old GCP/BigQuery-era variables.
+- [ ] Document separate local vs Docker endpoint values for service URLs.
 
-## 5. Environment and Config
+## 5. API and Product
 
-- [ ] Add required MongoDB env vars (example):
-  - `MONGODB_URI`
-  - `MONGODB_DB_NAME`
-  - optional collection names
-- [ ] Remove or deprecate BigQuery-only env vars where no longer used.
-- [ ] Update `backend/utils/Env.ts` validation to include MongoDB config.
+- [x] Auth endpoints (`/auth/register`, `/auth/login`).
+- [x] Upload endpoint (`/upload`) with JWT + multipart audio.
+- [x] Calls endpoints (`/calls`, `/calls/:id`).
+- [ ] Add pagination metadata and cursor-based paging for large datasets.
+- [ ] Add analysis-only endpoint wiring if needed (controller has method but route not exposed).
+- [ ] Add endpoint-level request validation (zod/joi/class-validator).
 
-## 6. Documentation Updates
+## 6. Testing
 
-- [ ] Fix inconsistencies in `Readme.md`:
-  - Replace BigQuery flow blocks with MongoDB flow end-to-end.
-  - Replace "Database Schema (BigQuery)" with MongoDB collection schema.
-  - Update processing workflow text that still says "Saves transcript in BigQuery".
-- [ ] Add a short "MongoDB local setup" section in `backend/README.md`.
-- [ ] Document migration notes if legacy BigQuery data still exists.
+- [ ] Unit tests for services (`analysisService`, `mongodbService`, `agentService`).
+- [ ] Integration tests for auth, upload, and call retrieval routes.
+- [ ] Worker pipeline integration test (queue -> transcript -> analysis persistence).
+- [ ] Smoke test script for local readiness checks.
 
-## 7. Testing and Verification
+## 7. Documentation
 
-- [ ] Add unit tests for Mongo repository/service methods.
-- [ ] Add integration tests for:
-  - `GET /calls`
-  - `GET /calls/:id`
-  - upload -> transcript persistence -> analysis persistence flow
-- [ ] Add one smoke test script to verify DB connection + read/write.
-- [ ] Run regression checks to ensure existing auth/upload APIs still behave the same.
+- [x] Update root `Readme.md` to match current MongoDB + RabbitMQ + Whisper + Ollama architecture.
+- [ ] Add `backend/README.md` focused on backend-only setup and troubleshooting.
+- [ ] Document operational runbook (model pull, queue health, common failure modes).
 
-## 8. Cleanup and Naming
+## 8. Cleanup
 
-- [ ] Rename files/classes still containing "BigQuery" naming to avoid confusion.
-- [ ] Remove dead fallback logic that stores records only in in-memory arrays.
-- [ ] Verify log messages and comments consistently reference MongoDB.
-- [ ] Optional: add a repository abstraction to make future DB swaps easier.
+- [ ] Remove unused cloud SDK dependencies from `backend/package.json` if no longer required.
+- [ ] Standardize import paths with `.js` extension for ESM consistency.
+- [ ] Review and remove stale comments/log messages from earlier architecture.

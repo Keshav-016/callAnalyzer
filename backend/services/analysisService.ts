@@ -27,17 +27,25 @@ SCORING CRITERIA:
 - 7-8: Good performance (clear, polite, helpful)
 - 9-10: Excellent performance (empathetic, proactive, highly professional)
 
+Before giving score:
+- Evaluate tone
+- Evaluate empathy
+- Evaluate clarity
+
+Then assign score strictly based on criteria
+
 ANALYZE:
 - Tone and professionalism
 - Empathy shown
 - Clarity of explanation
 - Ability to handle customer frustration
 - Whether proper steps were followed
+- If information is unclear, say unclear
 
 Return STRICT JSON only. No explanation. No markdown.
 
 {
-  "summary": "Short 2-3 sentence summary of the call",
+  "summary": "brief 4-5 sentence summary of the call",
   "category": "billing_issue | technical_support | account_issue | general_query | other",
   "sentiment": "Positive | Neutral | Negative",
   "score": number,
@@ -51,12 +59,14 @@ class AnalysisService {
   analyzeTranscript = async (transcript: string): Promise<AnalysisResultType> => {
     try {
       const response = await axios.post(`${OLLAMA_URL}/api/generate`, {
-        model: 'llama3',
+        model: 'llama',
         prompt: `${prompt}Transcript:"""${transcript}"""`,
         stream: false,
         format: 'json',
         options: {
-          temperature: 0.2,
+          temperature: 0.1,
+          top_p: 0.9,
+          num_predict: 250,
         },
       });
 

@@ -51,17 +51,19 @@ Node Backend API
 ↓
 Cloud Storage (audio files)
 ↓
-RabbitMQ Queue
+RabbitMQ (transcription queue)
 ↓
 Speech-to-Text Worker
 ↓
-MongoDB (raw transcripts)
+MongoDB (store transcript)
 ↓
-Scheduled llama Job
+RabbitMQ (analysis queue)   ← ADD THIS
+↓
+Llama Worker
 ↓
 MongoDB (analysis results)
 ↓
-Looker Studio Dashboard
+Dashboard
 
 ---
 
@@ -88,7 +90,6 @@ Looker Studio Dashboard
 - Express.js
 - REST APIs
 - Service-based architecture
-- Cron Scheduler
 
 **Responsibilities:**
 
@@ -214,69 +215,95 @@ This ensures:
 
 - Subscribes to Pub/Sub
 - Sends audio to Speech-to-Text API
-- Saves transcript in BigQuery
+- Saves transcript in Mongodb
 - Marks `analyzed = FALSE`
+- Add to queue(RabbitMQ) for analyzing 
 
-## Step 3: Scheduled AI Job
+## Step 3: Analyze Call
 
-Runs every 10 minutes:
+- Worker consumes message from RabbitMQ (analysis queue)
+- Extract call_id from message
+- Fetch transcript from database (BigQuery / MongoDB)
 
-```sql
-SELECT *
-FROM call_transcripts
-WHERE analyzed = FALSE
-LIMIT 10;
+- Validate:
+  - Transcript exists
+  - analyzed = FALSE
 
----
+-------------------------------
+AI Processing
+-------------------------------
 
-For each record:
-	•	Send transcript to Gemini
-	•	Parse structured output
-	•	Insert into call_analysis
-	•	Mark transcript as analyzed
+- Build structured prompt (QA supervisor role)
+- Send transcript to Gemini / LLM
+- Expect STRICT JSON response:
+  {
+    "summary": "",
+    "category": "",
+    "sentiment": "",
+    "agent_score": number,
+    "improvements": []
+  }
 
-⸻
+-------------------------------
+Post Processing
+-------------------------------
 
-📊 Dashboard Metrics
+- Parse AI response
+- Validate JSON:
+  - Check required fields
+  - Validate data types
+- Handle failures:
+  - Invalid JSON
+  - Empty response
+  - Partial fields
 
-Managers can view:
-	•	📈 Average agent score per week
-	•	🏆 Top performing agents
-	•	😡 Sentiment distribution
-	•	📊 Call category breakdown
-	•	🚨 Low-score alerts
-	•	📉 Weekly trends
+-------------------------------
+Database Updates
+-------------------------------
 
-⸻
+- Insert into analyzed_calls:
+  - call_id
+  - summary
+  - category
+  - sentiment
+  - agent_score
+  - improvements
+  - processed_at
 
-💰 Cost Optimization Strategy
+- Update transcript record:
+  - analyzed = TRUE
 
-Designed for free / minimal cost:
-	•	BigQuery free tier (10GB storage, 1TB queries)
-	•	Limited daily processing
-	•	Batch AI calls
-	•	Transcript length control
-	•	Billing alerts enabled
+-------------------------------
+Error Handling & Retry
+-------------------------------
 
-⸻
+- If AI call fails:
+  - Retry (max 3 attempts, exponential backoff)
 
-🔄 Future Upgrade Path
+- If still failing:
+  - Push to dead-letter queue
+  - Log error for debugging
 
-Phase 2 Enhancements
-	•	Replace Gemini with local Ollama models
-	•	Add role-based authentication
-	•	Build custom React dashboard
-	•	Add real-time streaming transcription
-	•	Add compliance detection rules
+-------------------------------
+Monitoring & Metrics
+-------------------------------
 
-⸻
+- Track:
+  - Processing time
+  - Success / failure rate
+  - API usage / cost
 
-🔐 Security Considerations
-	•	Mask PII in transcripts
-	•	Use dummy/sample audio
-	•	Restrict IAM permissions
-	•	Use service accounts
-	•	Enable billing alerts
+- Log all events for observability
+
+-------------------------------
+Optional Enhancements
+-------------------------------
+
+- Batch processing (5–10 transcripts per run)
+- Rate limiting AI calls
+- Priority queue (urgent calls first)
+- Cache repeated transcripts
+
 
 ⸻
 
@@ -291,7 +318,4 @@ backend/
   workers/
   scheduler/
 
-frontend/
-  screens/
-  components/
 ```

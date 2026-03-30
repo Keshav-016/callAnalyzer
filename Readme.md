@@ -100,21 +100,9 @@ Looker Studio Dashboard
 
 ---
 
-## ☁ Cloud Infrastructure
-
-### Storage
-
-- Google Cloud Storage  
-  Stores raw audio files.
-
-### Messaging
-
-- Google Cloud Pub/Sub  
-  Decouples upload from processing.
-
 ### Speech-to-Text
 
-- Google Cloud Speech-to-Text API  
+- wisper
   Converts audio files to transcripts.
 
 ### Data Warehouse
@@ -124,8 +112,7 @@ Looker Studio Dashboard
 
 ### AI Analysis
 
-- Vertex AI
-- Gemini model
+- llama
 
 Performs:
 
